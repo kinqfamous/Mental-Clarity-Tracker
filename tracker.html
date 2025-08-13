@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>30-Day Mental Clarity Tracker</title>
+<style>
+  body { font-family: Arial, sans-serif; background: black; padding: 20px; color: white; }
+  h1 { text-align: center; }
+  .task { margin: 8px 0; }
+  input[type="checkbox"] { margin-right: 8px; }
+  .progress { height: 20px; background: #ddd; border-radius: 10px; overflow: hidden; margin-top: 15px; }
+  .progress-bar { height: 20px; background: #4caf50; width: 0%; transition: 0.3s; }
+  button { margin-top: 15px; padding: 10px; margin-right: 5px; }
+</style>
+</head>
+<body>
+
+<h1>30-Day Mental Clarity Tracker</h1>
+<div id="day-number"></div>
+<div id="tasks"></div>
+
+<div class="progress">
+  <div class="progress-bar" id="progress-bar"></div>
+</div>
+
+<div id="buttons"></div>
+
+<script>
+const program = [
+  // Days 1–7: Detox & Stabilize
+  ["Drink 2–3 liters of water", "Eat brain foods (fish, nuts, greens, blueberries, eggs)", "10 mins outside (oxygen boost)", "Go to bed & wake at fixed time", "Do a brain teaser for 10 mins", "Walk briskly for 20 mins"],
+  ["Hydrate well", "Eat brain foods", "Spend 15 mins in sunlight", "Sleep routine same as yesterday", "Do a puzzle or math problem", "20-min walk or light workout"],
+  ["Drink 2–3 liters of water", "Eat healthy fats", "Go outside 3× today", "Sleep routine", "Brain teaser", "Stretch + walk 20 mins"],
+  ["Hydrate", "Leafy greens + omega-3", "Fresh air break", "Sleep schedule", "Logic puzzle", "Brisk walk or jog 20 mins"],
+  ["Drink water", "Eat berries or nuts", "10 mins outdoor breathing", "Sleep on time", "Sudoku or crossword", "Light exercise 20 mins"],
+  ["Hydrate", "Eat eggs for choline", "Get sunlight", "Sleep routine", "Math challenge", "Walk or cycle 20 mins"],
+  ["Water goal met", "Brain foods", "Oxygen breaks", "Sleep fixed", "Word puzzle", "Strength or bodyweight exercise 20 mins"],
+
+  // Days 8–14: Focus Training
+  ["Deep work 15–20 mins", "Read 10 pages of a book", "Breathing exercise 5 mins", "Walk 20 mins", "Avoid multitasking for 1 hr"],
+  ["Deep work 20–25 mins", "Read 10–15 pages", "Meditate 5 mins", "Light exercise", "Brain teaser"],
+  ["Deep work 25–30 mins", "Read 10 pages", "No phone for 1 hr block", "Walk or light workout", "Logic puzzle"],
+  ["Deep work 30 mins", "Read something complex", "Breathing practice", "Stretch + walk", "Crossword"],
+  ["Deep work 35 mins", "Read non-fiction", "5-min mindfulness", "Exercise", "Math problem"],
+  ["Deep work 40 mins", "Read book chapter", "Mindfulness 5 mins", "Walk outside", "Puzzle or strategy game"],
+  ["Deep work 40 mins", "Read & take notes", "Breathing drill", "Exercise", "Limit social media"],
+
+  // Days 15–21: Cognitive Expansion
+  ["Solve one logic/maths problem", "Learn something new (video, course, or book)", "Journal 1 idea", "Strength training or cardio", "Read 10 pages"],
+  ["Solve problem", "Learn new skill", "Journal", "Exercise", "Teach yourself one fact"],
+  ["Complex puzzle", "Continue skill learning", "Write a short reflection", "Walk 20 mins", "Read"],
+  ["Solve problem", "Learn something new", "Write down idea", "Strength workout", "Teach someone a concept"],
+  ["Hard puzzle or problem", "Learn & practice skill", "Journal reflection", "Walk or cycle", "Read"],
+  ["Logic/maths problem", "Learn something new", "Journal insight", "Exercise", "Discuss what you learned"],
+  ["Complex challenge", "Learn & apply skill", "Journal", "Cardio workout", "Read"],
+
+  // Days 22–30: Deep Thinking Mastery
+  ["One hour of deep thinking", "Teach something you learned", "No screens for 1 hr", "Review progress", "Walk or exercise"],
+  ["Think deeply about a topic", "Explain concept to a friend", "Digital fast 1 hr", "Journal insight", "Exercise"],
+  ["One hour focus session", "Teach or post what you learned", "Screen-free 1 hr", "Reflect on growth", "Walk 20 mins"],
+  ["Pick a problem & brainstorm solutions", "Teach skill to someone", "Digital detox 1 hr", "Write down deep thoughts", "Exercise"],
+  ["Think for 1 hr without distractions", "Explain a book/topic", "No phone for 1 hr", "Review past notes", "Exercise"],
+  ["One deep session", "Teach & share", "Digital break", "Reflect on progress", "Walk or strength workout"],
+  ["Final deep thinking challenge", "Summarize your 30-day journey", "Plan next steps", "Celebrate progress", "Exercise"]
+];
+
+let day = localStorage.getItem("day") ? parseInt(localStorage.getItem("day")) : 0;
+let completedTasks = JSON.parse(localStorage.getItem("completedTasks")) || {};
+
+function loadDay() {
+  document.getElementById("day-number").innerHTML = `<h2>Day ${day + 1}</h2>`;
+  const taskContainer = document.getElementById("tasks");
+  taskContainer.innerHTML = "";
+  program[day].forEach((task, index) => {
+    const checked = completedTasks[`${day}-${index}`] ? "checked" : "";
+    taskContainer.innerHTML += `<div class="task"><input type="checkbox" ${checked} onchange="toggleTask(${index})">${task}</div>`;
+  });
+  updateProgress();
+
+  const buttons = document.getElementById("buttons");
+  if (day === program.length - 1) {
+    buttons.innerHTML = `
+      <button onclick="prevDay()">Previous Day</button>
+      <button onclick="restartProgram()">Restart Program</button>
+    `;
+  } else {
+    buttons.innerHTML = `
+      <button onclick="prevDay()">Previous Day</button>
+      <button onclick="nextDay()">Next Day</button>
+    `;
+  }
+}
+
+function toggleTask(index) {
+  const key = `${day}-${index}`;
+  completedTasks[key] = !completedTasks[key];
+  localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = program[day].length;
+  const done = Object.keys(completedTasks).filter(k => k.startsWith(`${day}-`) && completedTasks[k]).length;
+  const percent = (done / total) * 100;
+  document.getElementById("progress-bar").style.width = percent + "%";
+}
+
+function nextDay() {
+  if (day < program.length - 1) {
+    day++;
+    localStorage.setItem("day", day);
+    loadDay();
+  }
+}
+
+function prevDay() {
+  if (day > 0) {
+    day--;
+    localStorage.setItem("day", day);
+    loadDay();
+  }
+}
+
+function restartProgram() {
+  day = 0;
+  completedTasks = {};
+  localStorage.setItem("day", day);
+  localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
+  loadDay();
+}
+
+loadDay();
+</script>
+</body>
+</html>
