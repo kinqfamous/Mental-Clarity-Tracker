@@ -2,201 +2,182 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>30-Day Mental Clarity Tracker</title>
 <style>
-  body { 
-    font-family: Arial, sans-serif; 
-    background: black; 
-    padding: 20px; 
-    color: white; 
-    max-width: 600px; 
-    margin: auto;
-  }
+  body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+  .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; margin-top: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
   h1, h2 { text-align: center; }
-  .task { 
-    margin: 8px 0; 
-    display: flex; 
-    align-items: center; 
-    font-size: 1rem;
-  }
-  input[type="checkbox"] { 
-    margin-right: 8px; 
-    transform: scale(1.3); 
-    cursor: pointer;
-  }
-  .progress-container {
-    margin-top: 15px;
-  }
-  .progress-label {
-    font-size: 0.9rem;
-    margin-bottom: 4px;
-  }
-  .progress {
-    height: 20px; 
-    background: #444; 
-    border-radius: 10px; 
-    overflow: hidden;
-  }
-  .progress-bar { 
-    height: 20px; 
-    background: #4caf50; 
-    width: 0%; 
-    transition: width 0.3s ease-in-out; 
-  }
-  button { 
-    margin-top: 15px; 
-    padding: 10px 15px; 
-    font-size: 1rem; 
-    background: #4caf50; 
-    border: none; 
-    border-radius: 5px; 
-    cursor: pointer; 
-    color: white;
-    gap: 10px; 
-    flex-wrap: wrap;
-  }
-  button:hover { background: #45a049; }
-  #buttons { text-align: center; }
+  ul { list-style: none; padding: 0; }
+  li { padding: 8px; background: #f9f9f9; margin: 5px 0; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+  li.completed { background: #d4edda; }
+  button { padding: 8px 15px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+  .btn-primary { background: #007bff; color: white; }
+  .btn-danger { background: #dc3545; color: white; }
+  .progress { height: 20px; background: #ddd; border-radius: 10px; overflow: hidden; margin: 15px 0; }
+  .progress-bar { height: 100%; background: #28a745; width: 0; transition: width 0.3s ease; }
+  .task-date { font-size: 0.8em; color: #555; }
+  .warning-box { background: #ffe6e6; border: 1px solid red; padding: 10px; border-radius: 5px; margin-top: 15px; }
+  .warning-box h3 { color: red; margin-top: 0; }
+  body.dark { background: #121212; color: #e0e0e0; }
+  body.dark .container { background: #1e1e1e; color: #e0e0e0; }
+  body.dark li { background: #2a2a2a; }
+  body.dark li.completed { background: #1b3d2f; }
+  body.dark .warning-box { background: #2a1e1e; border-color: #ff4d4d; }
+  body.dark .task-date { color: #aaa; }
+  body.dark .progress { background: #333; }
 </style>
 </head>
 <body>
 
-<h1>30-Day Mental Clarity Tracker</h1>
-<div id="day-number"></div>
-<div id="tasks"></div>
+<div class="container">
+  <h1>30-Day Mental Clarity Tracker</h1>
 
-<div class="progress-container">
-  <div class="progress-label" id="day-progress-label"></div>
+  <div style="text-align:center; margin-bottom: 10px;">
+    <button onclick="toggleDarkMode()" class="btn-primary" id="theme-btn">Switch to Dark Mode</button>
+  </div>
+  
+  <!-- Day Selector -->
+  <div style="text-align:center; margin-bottom: 10px;">
+    <label for="day-select">Go to Day: </label>
+    <select id="day-select" onchange="goToDay(this.value)"></select>
+  </div>
+
+  <!-- Progress Bar -->
   <div class="progress">
-    <div class="progress-bar" id="progress-bar"></div>
+    <div id="progress-bar" class="progress-bar"></div>
+  </div>
+
+  <div id="day-number"></div>
+  <ul id="task-list"></ul>
+  
+  <div style="text-align:center;">
+    <button onclick="prevDay()" class="btn-primary">Previous</button>
+    <button onclick="nextDay()" class="btn-primary">Next</button>
+  </div>
+
+  <!-- Permanent Brain Protection Warnings -->
+  <div class="warning-box">
+    <h3>⚠️ Brain Protection Warnings</h3>
+    <ul>
+      <li>Do not smoke or vape — nicotine harms brain health.</li>
+      <li>Avoid excessive sugar — sugar crashes hurt focus.</li>
+      <li>Don’t skip sleep — your brain repairs itself at night.</li>
+      <li>Limit screen time without breaks — avoid eye strain.</li>
+      <li>Stay hydrated — dehydration causes brain fog.</li>
+    </ul>
   </div>
 </div>
-
-<div class="progress-container">
-  <div class="progress-label" id="global-progress-label"></div>
-  <div class="progress">
-    <div class="progress-bar" id="global-progress-bar"></div>
-  </div>
-</div>
-
-<div id="buttons"></div>
 
 <script>
 const program = [
-  // Days 1–7: Detox & Stabilize
-  ["Drink 2–3 liters of water", "Eat brain foods (fish, nuts, greens, blueberries, eggs)", "10 mins outside (oxygen boost)", "Go to bed & wake at fixed time", "Do a brain teaser for 10 mins", "Walk briskly for 20 mins"],
-  ["Hydrate well", "Eat brain foods", "Spend 15 mins in sunlight", "Sleep routine same as yesterday", "Do a puzzle or math problem", "20-min walk or light workout"],
-  ["Drink 2–3 liters of water", "Eat healthy fats", "Go outside 3× today", "Sleep routine", "Brain teaser", "Stretch + walk 20 mins"],
-  ["Hydrate", "Leafy greens + omega-3", "Fresh air break", "Sleep schedule", "Logic puzzle", "Brisk walk or jog 20 mins"],
-  ["Drink water", "Eat berries or nuts", "10 mins outdoor breathing", "Sleep on time", "Sudoku or crossword", "Light exercise 20 mins"],
-  ["Hydrate", "Eat eggs for choline", "Get sunlight", "Sleep routine", "Math challenge", "Walk or cycle 20 mins"],
-  ["Water goal met", "Brain foods", "Oxygen breaks", "Sleep fixed", "Word puzzle", "Strength or bodyweight exercise 20 mins"],
+  // Days 1–7
+  ["Drink 2–3 liters of water", "Eat brain foods (fish, nuts, greens)", "Spend 10 mins outside 3x/day", "Sleep at fixed times", "Do a 10-min brain teaser", "Walk 20 mins daily"],
+  ["Hydrate well", "Eat nutrient-rich breakfast", "Go outside morning & evening", "Avoid screens 30 mins before bed", "Do mental math 10 mins", "Stretch 10 mins"],
+  ["Drink water before meals", "Eat eggs/leafy greens", "Deep breathing 5 mins", "Sleep early", "Crossword puzzle", "Light jog or walk"],
+  ["Hydration goal met", "Have berries/nuts", "Get morning sunlight", "No caffeine after 6pm", "Math puzzle", "Bodyweight exercises"],
+  ["Drink water regularly", "Eat fish or omega-3 foods", "Spend time outdoors", "Keep sleep schedule", "Play logic game", "20 min brisk walk"],
+  ["2–3L water", "Leafy greens", "Breathing exercise", "Bed by 10–11pm", "Sudoku", "Stretching"],
+  ["Hydration on track", "Protein-rich meal", "Outdoor fresh air", "No screens pre-sleep", "Puzzle solving", "Light workout"],
 
-  // Days 8–14: Focus Training
-  ["Deep work 15–20 mins", "Read 10 pages of a book", "Breathing exercise 5 mins", "Walk 20 mins", "Avoid multitasking for 1 hr"],
-  ["Deep work 20–25 mins", "Read 10–15 pages", "Meditate 5 mins", "Light exercise", "Brain teaser"],
-  ["Deep work 25–30 mins", "Read 10 pages", "No phone for 1 hr block", "Walk or light workout", "Logic puzzle"],
-  ["Deep work 30 mins", "Read something complex", "Breathing practice", "Stretch + walk", "Crossword"],
-  ["Deep work 35 mins", "Read non-fiction", "5-min mindfulness", "Exercise", "Math problem"],
-  ["Deep work 40 mins", "Read book chapter", "Mindfulness 5 mins", "Walk outside", "Puzzle or strategy game"],
-  ["Deep work 40 mins", "Read & take notes", "Breathing drill", "Exercise", "Limit social media"],
+  // Days 8–14
+  ["15-min deep work session", "Drink water", "Read 10 pages", "Mindfulness 5 mins", "Walk 20 mins", "Avoid phone during focus"],
+  ["20-min deep work", "Eat nuts", "Read nonfiction", "Breathing exercise", "Stretch", "Limit distractions"],
+  ["25-min focus session", "Omega-3 food", "Read fiction", "Mindfulness", "Light exercise", "Hydration"],
+  ["30-min deep work", "Green tea instead of coffee", "Read", "Meditate", "Walk", "Avoid multitasking"],
+  ["35-min focus", "Healthy breakfast", "Learn a new word", "Mindfulness", "Stretch", "Hydration"],
+  ["40-min focus", "Eat fish", "Read tech article", "Meditation", "Light jog", "Phone-free hour"],
+  ["45-min focus", "Fruit breakfast", "Read biography", "Deep breathing", "Strength training", "Avoid distractions"],
 
-  // Days 15–21: Cognitive Expansion
-  ["Solve one logic/maths problem", "Learn something new (video, course, or book)", "Journal 1 idea", "Strength training or cardio", "Read 10 pages"],
-  ["Solve problem", "Learn new skill", "Journal", "Exercise", "Teach yourself one fact"],
-  ["Complex puzzle", "Continue skill learning", "Write a short reflection", "Walk 20 mins", "Read"],
-  ["Solve problem", "Learn something new", "Write down idea", "Strength workout", "Teach someone a concept"],
-  ["Hard puzzle or problem", "Learn & practice skill", "Journal reflection", "Walk or cycle", "Read"],
-  ["Logic/maths problem", "Learn something new", "Journal insight", "Exercise", "Discuss what you learned"],
-  ["Complex challenge", "Learn & apply skill", "Journal", "Cardio workout", "Read"],
+  // Days 15–21
+  ["Solve a problem", "Learn something new", "Journal 1 idea", "Strength train", "Hydrate", "Read"],
+  ["Logic puzzle", "Watch educational video", "Write reflection", "Cardio", "Outdoor walk", "Protein meal"],
+  ["Math problem", "Learn a skill", "Note 1 observation", "Stretch", "Read", "Drink water"],
+  ["Complex puzzle", "Take online quiz", "Journal", "Strength workout", "Eat greens", "Meditate"],
+  ["Problem solving", "Learn code basics", "Write insight", "Cardio", "Hydration", "Outdoor break"],
+  ["Logic game", "Learn chess move", "Journal", "Strength training", "Eat fish", "Mindfulness"],
+  ["Math challenge", "Learn new fact", "Write reflection", "Light jog", "Read", "Hydration"],
 
-  // Days 22–30: Deep Thinking Mastery
-  ["One hour of deep thinking", "Teach something you learned", "No screens for 1 hr", "Review progress", "Walk or exercise"],
-  ["Think deeply about a topic", "Explain concept to a friend", "Digital fast 1 hr", "Journal insight", "Exercise"],
-  ["One hour focus session", "Teach or post what you learned", "Screen-free 1 hr", "Reflect on growth", "Walk 20 mins"],
-  ["Pick a problem & brainstorm solutions", "Teach skill to someone", "Digital detox 1 hr", "Write down deep thoughts", "Exercise"],
-  ["Think for 1 hr without distractions", "Explain a book/topic", "No phone for 1 hr", "Review past notes", "Exercise"],
-  ["One deep session", "Teach & share", "Digital break", "Reflect on progress", "Walk or strength workout"],
-  ["Final deep thinking challenge", "Summarize your 30-day journey", "Plan next steps", "Celebrate progress", "Exercise"]
+  // Days 22–30
+  ["Think hour", "Teach something", "Digital fast 1h", "Hydrate", "Walk", "Read"],
+  ["Deep think", "Explain concept", "Digital break", "Strength train", "Eat greens", "Meditate"],
+  ["Creative thinking", "Teach friend", "1h offline", "Cardio", "Hydration", "Journal"],
+  ["Problem analysis", "Share knowledge", "Digital detox", "Stretch", "Protein meal", "Read"],
+  ["Idea hour", "Teach skill", "No screens", "Strength workout", "Hydration", "Mindfulness"],
+  ["Focus think", "Explain topic", "Digital break", "Outdoor walk", "Eat nuts", "Meditate"],
+  ["Final reflection", "Teach final lesson", "Plan next cycle", "Walk", "Hydration", "Celebrate!"]
 ];
 
-let day = localStorage.getItem("day") ? parseInt(localStorage.getItem("day")) : 0;
-let completedTasks = JSON.parse(localStorage.getItem("completedTasks")) || {};
+let day = parseInt(localStorage.getItem("day")) || 0;
+let progress = JSON.parse(localStorage.getItem("progress")) || {};
+let taskDates = JSON.parse(localStorage.getItem("taskDates")) || {};
+let darkMode = JSON.parse(localStorage.getItem("darkMode")) || false;
+
+function saveProgress() {
+  localStorage.setItem("progress", JSON.stringify(progress));
+  localStorage.setItem("taskDates", JSON.stringify(taskDates));
+}
 
 function renderTasks() {
-  const taskContainer = document.getElementById("tasks");
-  taskContainer.innerHTML = "";
+  const taskList = document.getElementById("task-list");
+  taskList.innerHTML = "";
   program[day].forEach((task, index) => {
-    const wrapper = document.createElement("div");
-    wrapper.className = "task";
+    const li = document.createElement("li");
+    if (progress[`${day}-${index}`]) li.classList.add("completed");
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.id = `task-${index}`;
-    checkbox.checked = completedTasks[`${day}-${index}`] || false;
-    checkbox.onchange = () => toggleTask(index);
+    checkbox.checked = progress[`${day}-${index}`] || false;
+    checkbox.onchange = () => {
+      progress[`${day}-${index}`] = checkbox.checked;
+      if (checkbox.checked) {
+        li.classList.add("completed");
+        taskDates[`${day}-${index}`] = new Date().toLocaleString();
+      } else {
+        li.classList.remove("completed");
+        delete taskDates[`${day}-${index}`];
+      }
+      saveProgress();
+      updateProgress();
+    };
 
-    const label = document.createElement("label");
-    label.setAttribute("for", `task-${index}`);
-    label.textContent = task;
+    const span = document.createElement("span");
+    span.textContent = task;
 
-    wrapper.appendChild(checkbox);
-    wrapper.appendChild(label);
-    taskContainer.appendChild(wrapper);
+    const dateSpan = document.createElement("span");
+    dateSpan.classList.add("task-date");
+    dateSpan.textContent = taskDates[`${day}-${index}`] ? `✔ ${taskDates[`${day}-${index}`]}` : "";
+
+    li.appendChild(checkbox);
+    li.appendChild(span);
+    li.appendChild(dateSpan);
+    taskList.appendChild(li);
   });
 }
 
 function renderButtons() {
-  const buttons = document.getElementById("buttons");
-  buttons.innerHTML = "";
-  
-  if (day > 0) {
-    const prevBtn = document.createElement("button");
-    prevBtn.textContent = "Previous Day";
-    prevBtn.onclick = prevDay;
-    buttons.appendChild(prevBtn);
-  }
-  
-  if (day < program.length - 1) {
-    const nextBtn = document.createElement("button");
-    nextBtn.textContent = "Next Day";
-    nextBtn.onclick = nextDay;
-    buttons.appendChild(nextBtn);
-  } else {
+  if (day === program.length - 1) {
     const restartBtn = document.createElement("button");
     restartBtn.textContent = "Restart Program";
-    restartBtn.onclick = restartProgram;
-    buttons.appendChild(restartBtn);
+    restartBtn.classList.add("btn-danger");
+    restartBtn.onclick = () => {
+      if (confirm("Restart and clear all progress?")) {
+        localStorage.clear();
+        day = 0;
+        progress = {};
+        taskDates = {};
+        loadDay();
+      }
+    };
+    document.querySelector(".container").appendChild(restartBtn);
   }
 }
 
 function updateProgress() {
-  const total = program[day].length;
-  const done = Object.keys(completedTasks).filter(k => k.startsWith(`${day}-`) && completedTasks[k]).length;
-  const percent = (done / total) * 100;
-  document.getElementById("progress-bar").style.width = percent + "%";
-  document.getElementById("day-progress-label").textContent = `Today's Progress: ${done}/${total} tasks`;
-
   const totalTasks = program.flat().length;
-  const totalDone = Object.values(completedTasks).filter(Boolean).length;
-  const globalPercent = (totalDone / totalTasks) * 100;
-  document.getElementById("global-progress-bar").style.width = globalPercent + "%";
-  document.getElementById("global-progress-label").textContent = `Overall Progress: ${totalDone}/${totalTasks} tasks`;
-}
-
-function toggleTask(index) {
-  const key = `${day}-${index}`;
-  completedTasks[key] = !completedTasks[key];
-  localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
-  updateProgress();
-}
-
-function nextDay() {
-  if (day < program.length - 1) {
-    day++;
-    localStorage.setItem("day", day);
-    loadDay();
-  }
+  const completedTasks = Object.values(progress).filter(Boolean).length;
+  const percent = (completedTasks / totalTasks) * 100;
+  document.getElementById("progress-bar").style.width = percent + "%";
 }
 
 function prevDay() {
@@ -207,23 +188,59 @@ function prevDay() {
   }
 }
 
-function restartProgram() {
-  day = 0;
-  completedTasks = {};
+function nextDay() {
+  if (day < program.length - 1) {
+    day++;
+    localStorage.setItem("day", day);
+    loadDay();
+  }
+}
+
+function populateDaySelect() {
+  const select = document.getElementById("day-select");
+  select.innerHTML = "";
+  for (let i = 0; i < program.length; i++) {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = `Day ${i + 1}`;
+    if (i === day) option.selected = true;
+    select.appendChild(option);
+  }
+}
+
+function goToDay(selectedDay) {
+  day = parseInt(selectedDay);
   localStorage.setItem("day", day);
-  localStorage.setItem("completedTasks", JSON.stringify(completedTasks));
   loadDay();
 }
 
 function loadDay() {
-  window.scrollTo(0, 0);
+  populateDaySelect();
   document.getElementById("day-number").innerHTML = `<h2>Day ${day + 1}</h2>`;
+  document.querySelectorAll(".btn-danger").forEach(btn => btn.remove());
   renderTasks();
   renderButtons();
   updateProgress();
+  applyDarkMode();
+}
+function toggleDarkMode() {
+  darkMode = !darkMode;
+  localStorage.setItem("darkMode", JSON.stringify(darkMode));
+  applyDarkMode();
+}
+
+function applyDarkMode() {
+  if (darkMode) {
+    document.body.classList.add("dark");
+    document.getElementById("theme-btn").textContent = "Switch to Light Mode";
+  } else {
+    document.body.classList.remove("dark");
+    document.getElementById("theme-btn").textContent = "Switch to Dark Mode";
+  }
 }
 
 loadDay();
 </script>
+
 </body>
 </html>
